@@ -1,0 +1,102 @@
+{
+  "resources": {
+    "head": [
+      {
+        "type": "script",
+        "src": "./app.js"
+      },
+      {
+        "type": "style",
+        "src": "./app.css"
+      }
+    ]
+  },
+  "preview": {
+    "handlers": [
+      {
+        "options": ["*"],
+        "execute": "INSTALL_SCOPE.setOptions(INSTALL_OPTIONS)"
+      }
+    ]
+  },
+  "options": {
+    "properties": {
+      "element": {
+        "title": "Location",
+        "description": "Where the font resizer will appear",
+        "type": "object",
+        "format": "element",
+        "default": {
+          "selector": "body",
+          "method": "append"
+        }
+      },
+      "corner": {
+        "title": "Corner",
+        "description": "Corner (of the previously selected location) that the font resizer should appear in",
+        "type": "string",
+        "format": "radios",
+        "enum": [
+          "topLeft",
+          "topRight",
+          "bottomLeft",
+          "bottomRight"
+        ],
+        "enumNames": {
+          "topLeft": "Top Left",
+          "topRight": "Top Right",
+          "bottomLeft": "Bottom Left",
+          "bottomRight": "Bottom Right"
+        },
+        "default": "bottomRight"
+      },
+      "horizontalMargin": {
+        "title": "Horizontal Margin",
+        "type": "number",
+        "default": 20
+      },
+      "verticalMargin": {
+        "title": "Vertical Margin",
+        "type": "number",
+        "default": 20
+      },
+      "units": {
+        "title": "Margin Units",
+        "description": "Units that the margin should be expressed in",
+        "type": "string",
+        "format": "radios",
+        "enum": [
+          "px",
+          "em",
+          "%"
+        ],
+        "enumNames": {
+          "px": "px",
+          "em": "em",
+          "%": "%"
+        },
+        "default": "px"
+      },
+      "bgcolor": {
+        "title": "Background Color",
+        "description": "Background color of the font resizer",
+        "type": "string",
+        "format": "color",
+        "default": "#000000"
+      },
+      "textColor": {
+        "title": "Text Color",
+        "description": "Text color for the \"A\"s on the font resizer",
+        "type": "string",
+        "format": "color",
+        "default": "#ffffff"
+      },
+      "opacity": {
+        "title": "Opacity",
+        "description": "Opacity (out of 100) of the background and of unselected \"A\"s on the font resizer",
+        "type": "number",
+        "default": 80
+      }
+    }
+  }
+}
