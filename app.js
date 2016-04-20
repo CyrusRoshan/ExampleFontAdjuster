@@ -35,6 +35,7 @@
   // If the visitor hasn't viewed the site before, we default to 'medium',
   // which does not change the font size for any elements
   var viewSize = 'medium';
+  var textContainingElements = [];
 
   var textResizer = null;
   var updateElement = function(){
@@ -107,13 +108,6 @@
       ${horizontalDirection}: ${options.horizontalMargin}px;
     `);
 
-    var textContainingElements = [];
-    document.querySelectorAll('body *').forEach((element) => {
-      if (element.innerText && textResizer.className != element.parentNode.className) {
-        textContainingElements.push(element);
-      }
-    });
-
     // Literally creates the A's in the font size selector
     function createA(name) {
       // Add CSS here
@@ -142,7 +136,7 @@
       }
 
       // Add onClick font modification here
-      createdA.onclick = () => {resizeText(name, textContainingElements)};
+      createdA.onclick = () => {resizeText(name)};
       return createdA;
     }
 
@@ -151,23 +145,61 @@
     textResizer.appendChild(createA('medium'));
     textResizer.appendChild(createA('large'));
 
-    resizeText(localStorage.viewSize || 'medium', textContainingElements);
+    updateTextElements();
+    resizeText(localStorage.viewSize || 'medium');
+
+    // Create a MutationObserver instance to monitor new text containing nodes if they are
+    // added on DOM modification
+    var MutationObserver = new MutationObserver((mutations) => {
+      for (var i = 0; i < mutations.length; i++){
+        if (mutations[i].type === 'childList'){
+          updateTextElements();
+          break;
+        }
+      };
+    });
+    MutationObserver.observe(document.querySelector('body'), {subtree: true, childList: true});
   };
+
+  // Get all text containing elements, so we don't have to waste time on non-text containing
+  // elements. This makes it much faster to change text sizes. This also however means that
+  // we have to repeat this function each time an element is added to the DOM tree.
+  function updateTextElements(){
+    textContainingElements = [];
+    document.querySelectorAll('body *').forEach((element) => {
+      if (element.innerText && textResizer.className != element.parentNode.className) {
+        textContainingElements.push(element);
+      }
+    });
+  }
 
   // For resizing text. Assuming this is completely modular, it's going to be a bit
   // inefficient because we'll be changing the font size for every element
-  function resizeText(newSize, elements){
-    
-
-    console.log(viewSize + ' -> ' + newSize);
-    if (true){//viewSize != newSize) {
-      var newNumericSize = sizeToRatio[newSize].actualSize / sizeToRatio[viewSize].actualSize;
-      elements.forEach((element) => {
-        var size = window.getComputedStyle(element, null).getPropertyValue('font-size');
-        element.style.fontSize = parseFloat(size) * newNumericSize + 'px';
-      })
-      viewSize = localStorage.viewSize = newSize;
+  function resizeText(newSize){
+    // Modify the A that got selected
+    var i = 0;
+    for (var key in sizeToRatio) {
+      i++;
+      if (key === newSize){
+        textResizer.querySelector(`div:nth-child(${i})`).style.cssText += (`
+          font-weight: 800;
+          opacity: 1;
+        `);
+      } else if (key === viewSize) {
+        textResizer.querySelector(`div:nth-child(${i})`).style.cssText += (`
+          font-weight: 200;
+          opacity: ${options.opacity / 100};
+        `);
+      }
     }
+
+  // Modify the font size of all text-containing elements
+    var newNumericSize = sizeToRatio[newSize].actualSize / sizeToRatio[viewSize].actualSize;
+    textContainingElements.forEach((element) => {
+      var size = window.getComputedStyle(element, null).getPropertyValue('font-size');
+      element.style.fontSize = parseFloat(size) * newNumericSize + 'px';
+    })
+    viewSize = localStorage.viewSize = newSize;
   }
 
   var update = function(){
