@@ -57,10 +57,6 @@
       }
     }
 
-    // We're adding all of our CSS dynamically in js without
-    // .css files because the CSS itself is generated depending on the options that the
-    // website owner configures depending on his/her preferences
-
     // The text resizer itself
     textResizer = Eager.createElement(options.element, textResizer);
     textResizer.className = 'example-font-size-resizer';
@@ -87,8 +83,9 @@
         break;
     };
 
-    // Could either do this or use javascript to change opacity on each hover.
-    // I think this is easier to view and debug
+    // We're adding all of our CSS dynamically in js without
+    // .css files because the CSS itself is generated depending on the options that the
+    // website owner configures depending on his/her preferences
     var hoverCSS = document.createElement('style');
     hoverCSS.innerHTML = (`
       .${textResizer.className} {
