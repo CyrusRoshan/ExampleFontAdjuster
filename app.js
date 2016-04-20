@@ -16,19 +16,34 @@
   // wastes time that they should have been using on the website's actual content.
   // However, it's not that hard to modify to allow website owners to add additional sizes
   const sizeToRatio = {
-    'small': 0.7,
-    'medium': 1,
-    'large': 1.3
+    'small': {
+      shownSize: 0.7,
+      actualSize: 0.7
+    },
+    'medium': {
+      shownSize: 1,
+      actualSize: 1
+    },
+    'large': {
+      shownSize: 1.5,
+      actualSize: 1.5
+    }
   }
 
 
   // We get our stored view size from the last time a visitor viewed the site.
   // If the visitor hasn't viewed the site before, we default to 'medium',
   // which does not change the font size for any elements
-  var viewSize = localStorage.viewSize || 'medium';
+  var viewSize = 'medium';
 
   var textResizer = null;
   var updateElement = function(){
+    // To disable font boosting in order to get proper computed element sizes
+    // thanks to http://stackoverflow.com/a/15261825
+    var node = document.createElement('style');
+    node.innerHTML = 'body, body * { max-height: 1000000px; }';
+    document.body.appendChild(node);
+
     // We pass in the last element to allow us to restore the removed element
     // when we do live updating of the preview.  Details:
     // https://eager.io/developer/docs/install-json/preview#dealing-with-element-fields
@@ -49,11 +64,15 @@
 
     // The text resizer itself
     textResizer = Eager.createElement(options.element, textResizer);
-    textResizer.parentNode.backgroundColor = 'red';
+    textResizer.className = 'example-font-size-resizer';
     textResizer.style.cssText = (`
       display: inline-block;
       padding: 5px;
       z-index: 2147483647;
+      -moz-user-select: none;
+      -khtml-user-select: none;
+      -webkit-user-select: none;
+      -o-user-select: none;
       border-radius: ${options.borderRadius}px;
       background-color: ${options.backgroundColor};
       opacity: ${options.opacity / 100};
@@ -88,6 +107,13 @@
       ${horizontalDirection}: ${options.horizontalMargin}px;
     `);
 
+    var textContainingElements = [];
+    document.querySelectorAll('body *').forEach((element) => {
+      if (element.innerText && textResizer.className != element.parentNode.className) {
+        textContainingElements.push(element);
+      }
+    });
+
     // Literally creates the A's in the font size selector
     function createA(name) {
       // Add CSS here
@@ -97,13 +123,15 @@
         float: left;
         display: block;
         margin: 0;
+        font-weight: 200;
+        font-family: lato, helvetica, arial;
         background-color: transparent;
         cursor: pointer;
         padding: ${options.fontSize / 5}px;
         color: ${options.textColor};
         opacity: ${options.opacity / 100};
-        line-height: ${options.fontSize * sizeToRatio['large']}px;
-        font-size: ${options.fontSize * sizeToRatio[name]}px;
+        line-height: ${options.fontSize * sizeToRatio['large'].shownSize}px;
+        font-size: ${options.fontSize * sizeToRatio[name].shownSize}px;
       `);
       if (name === 'medium') {
         createdA.style.cssText += (`
@@ -114,17 +142,32 @@
       }
 
       // Add onClick font modification here
-      createdA.onclick = () => {console.log(name)};
+      createdA.onclick = () => {resizeText(name, textContainingElements)};
       return createdA;
     }
 
+    // Actually create the different sized A's
     textResizer.appendChild(createA('small'));
     textResizer.appendChild(createA('medium'));
     textResizer.appendChild(createA('large'));
+
+    resizeText(localStorage.viewSize || 'medium', textContainingElements);
   };
 
-  function resizeText(newSize){
+  // For resizing text. Assuming this is completely modular, it's going to be a bit
+  // inefficient because we'll be changing the font size for every element
+  function resizeText(newSize, elements){
+    
 
+    console.log(viewSize + ' -> ' + newSize);
+    if (true){//viewSize != newSize) {
+      var newNumericSize = sizeToRatio[newSize].actualSize / sizeToRatio[viewSize].actualSize;
+      elements.forEach((element) => {
+        var size = window.getComputedStyle(element, null).getPropertyValue('font-size');
+        element.style.fontSize = parseFloat(size) * newNumericSize + 'px';
+      })
+      viewSize = localStorage.viewSize = newSize;
+    }
   }
 
   var update = function(){
