@@ -108,6 +108,12 @@
         "type": "number",
         "default": 90
       },
+      "transitionTime": {
+        "title": "Transition Time",
+        "description": "Time (in milliseconds) for the text resizer to transition between its different states (e.g. no hover to hover for a change in opacity)",
+        "type": "number",
+        "default": 500
+      },
       "verticalMargin": {
         "title": "Vertical Margin",
         "description": "Vertical margin of the font resizer (in px)",

@@ -34,9 +34,7 @@
   // We get our stored view size from the last time a visitor viewed the site.
   // If the visitor hasn't viewed the site before, we default to 'medium',
   // which does not change the font size for any elements
-  var viewSize = 'medium';
   var textContainingElements = [];
-
   var textResizer = null;
   var updateElement = function(){
     // To disable font boosting in order to get proper computed element sizes
@@ -66,19 +64,6 @@
     // The text resizer itself
     textResizer = Eager.createElement(options.element, textResizer);
     textResizer.className = 'example-font-size-resizer';
-    textResizer.style.cssText = (`
-      display: inline-block;
-      padding: 5px;
-      z-index: 2147483647;
-      -moz-user-select: none;
-      -khtml-user-select: none;
-      -webkit-user-select: none;
-      -o-user-select: none;
-      border-radius: ${options.borderRadius}px;
-      background-color: ${options.backgroundColor};
-      opacity: ${options.opacity / 100};
-      position: ${options.position};
-    `);
 
     // Converting corner position, and vertical/horizontal margins to CSS
     var verticalDirection, horizontalDirection;
@@ -102,18 +87,35 @@
         break;
     };
 
-    // Apply corner and margin CSS
-    textResizer.style.cssText += (`
-      ${verticalDirection}: ${options.verticalMargin}px;
-      ${horizontalDirection}: ${options.horizontalMargin}px;
-    `);
+    // Could either do this or use javascript to change opacity on each hover.
+    // I think this is easier to view and debug
+    var hoverCSS = document.createElement('style');
+    hoverCSS.innerHTML = (`
+      .${textResizer.className} {
+        display: inline-block;
+        padding: 5px;
+        z-index: 2147483647;
+        -moz-user-select: none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -o-user-select: none;
+        border-radius: ${options.borderRadius}px;
+        background-color: ${options.backgroundColor};
+        opacity: ${options.opacity / 100};
+        position: ${options.position};
+        ${verticalDirection}: ${options.verticalMargin}px;
+        ${horizontalDirection}: ${options.horizontalMargin}px;
+        -webkit-transition-duration: ${options.transitionTime}ms;
+        -moz-transition-duration: ${options.transitionTime}ms;
+        -o-transition-duration: ${options.transitionTime}ms;
+        transition-duration: ${options.transitionTime}ms;
+      }
 
-    // Literally creates the A's in the font size selector
-    function createA(name) {
-      // Add CSS here
-      createdA = document.createElement('div');
-      createdA.innerText = 'A';
-      createdA.style.cssText = (`
+      .${textResizer.className}:hover {
+        opacity: ${options.onhoverOpacity / 100};
+      }
+
+      .${textResizer.className} div {
         float: left;
         display: block;
         margin: 0;
@@ -124,9 +126,27 @@
         padding: ${options.fontSize / 5}px;
         color: ${options.textColor};
         opacity: ${options.opacity / 100};
+      }
+      .${textResizer.className} div:hover {
+        opacity: ${options.onhoverOpacity / 100};
+      }
+      .${textResizer.className} div.selected {
+        font-weight: 800;
+        opacity: ${options.onhoverOpacity / 100 * 1.1};
+      }
+    `);
+    document.body.appendChild(hoverCSS);
+
+    // Literally creates the A's in the font size selector
+    function createA(name) {
+      createdA = document.createElement('div');
+      createdA.innerText = 'A';
+      // CSS that depends on the size of the A
+      createdA.style.cssText += (`
         line-height: ${options.fontSize * sizeToRatio['large'].shownSize}px;
         font-size: ${options.fontSize * sizeToRatio[name].shownSize}px;
       `);
+      // For spacing
       if (name === 'medium') {
         createdA.style.cssText += (`
           margin: ${options.spacing}px;
@@ -134,9 +154,8 @@
           margin-bottom: 0;
         `);
       }
-
       // Add onClick font modification here
-      createdA.onclick = () => {resizeText(name)};
+      createdA.onclick = () => {resizeText(localStorage.viewSize, name)};
       return createdA;
     }
 
@@ -146,11 +165,16 @@
     textResizer.appendChild(createA('large'));
 
     updateTextElements();
-    resizeText(localStorage.viewSize || 'medium');
+    var viewSize = localStorage.viewSize;
+    resizeText('medium', 'medium');
+    // Weird bug where
+    if (localStorage.viewSize) {
+      resizeText('medium', viewSize);
+    }
 
     // Create a MutationObserver instance to monitor new text containing nodes if they are
     // added on DOM modification
-    var MutationObserver = new MutationObserver((mutations) => {
+    var observer = new MutationObserver((mutations) => {
       for (var i = 0; i < mutations.length; i++){
         if (mutations[i].type === 'childList'){
           updateTextElements();
@@ -158,7 +182,7 @@
         }
       };
     });
-    MutationObserver.observe(document.querySelector('body'), {subtree: true, childList: true});
+    observer.observe(document.querySelector('body'), {subtree: true, childList: true});
   };
 
   // Get all text containing elements, so we don't have to waste time on non-text containing
@@ -175,21 +199,15 @@
 
   // For resizing text. Assuming this is completely modular, it's going to be a bit
   // inefficient because we'll be changing the font size for every element
-  function resizeText(newSize){
+  function resizeText(oldSize, newSize){
     // Modify the A that got selected
     var i = 0;
     for (var key in sizeToRatio) {
       i++;
       if (key === newSize){
-        textResizer.querySelector(`div:nth-child(${i})`).style.cssText += (`
-          font-weight: 800;
-          opacity: 1;
-        `);
-      } else if (key === viewSize) {
-        textResizer.querySelector(`div:nth-child(${i})`).style.cssText += (`
-          font-weight: 200;
-          opacity: ${options.opacity / 100};
-        `);
+        textResizer.querySelector(`div:nth-child(${i})`).className = 'selected';
+      } else if (key === oldSize) {
+        textResizer.querySelector(`div:nth-child(${i})`).className = '';
       }
     }
 
@@ -197,15 +215,17 @@
     var scrollRatio = window.scrollY / document.documentElement.scrollHeight;
 
     // Modify the font size of all text-containing elements
-    var newNumericSize = sizeToRatio[newSize].actualSize / sizeToRatio[viewSize].actualSize;
+    var newNumericSize = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
     textContainingElements.forEach((element) => {
       var size = window.getComputedStyle(element, null).getPropertyValue('font-size');
       element.style.fontSize = parseFloat(size) * newNumericSize + 'px';
-    })
-    viewSize = localStorage.viewSize = newSize;
+    });
 
     // Return user to approximate previous scroll position
     window.scroll(window.scrollX, scrollRatio * document.documentElement.scrollHeight);
+
+    // Change current size to the new size that we've updated it to
+    localStorage.viewSize = newSize;
   }
 
   var update = function(){
