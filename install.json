@@ -100,13 +100,13 @@
         "title": "Opacity",
         "description": "Opacity (out of 100) of the background and of unselected \"A\"s on the font resizer",
         "type": "number",
-        "default": 80
+        "default": 60
       },
       "onhoverOpacity": {
         "title": "Opacity On Hover",
         "description": "Opacity (out of 100) of the background and of unselected \"A\"s on the font resizer when the mouse is hovered over",
         "type": "number",
-        "default": 80
+        "default": 90
       },
       "verticalMargin": {
         "title": "Vertical Margin",

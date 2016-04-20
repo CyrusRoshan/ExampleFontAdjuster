@@ -193,13 +193,19 @@
       }
     }
 
-  // Modify the font size of all text-containing elements
+    // Find current scroll position
+    var scrollRatio = window.scrollY / document.documentElement.scrollHeight;
+
+    // Modify the font size of all text-containing elements
     var newNumericSize = sizeToRatio[newSize].actualSize / sizeToRatio[viewSize].actualSize;
     textContainingElements.forEach((element) => {
       var size = window.getComputedStyle(element, null).getPropertyValue('font-size');
       element.style.fontSize = parseFloat(size) * newNumericSize + 'px';
     })
     viewSize = localStorage.viewSize = newSize;
+
+    // Return user to approximate previous scroll position
+    window.scroll(window.scrollX, scrollRatio * document.documentElement.scrollHeight);
   }
 
   var update = function(){
