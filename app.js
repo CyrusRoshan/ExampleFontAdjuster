@@ -83,6 +83,11 @@
         break;
     };
 
+    textResizer.style.cssText += (`
+      ${verticalDirection}: ${options.verticalMargin}px;
+      ${horizontalDirection}: ${options.horizontalMargin}px;
+    `);
+
     // We're adding all of our CSS dynamically in js without
     // .css files because the CSS itself is generated depending on the options that the
     // website owner configures depending on his/her preferences
@@ -100,8 +105,6 @@
         background-color: ${options.backgroundColor};
         opacity: ${options.opacity / 100};
         position: ${options.position};
-        ${verticalDirection}: ${options.verticalMargin}px;
-        ${horizontalDirection}: ${options.horizontalMargin}px;
         -webkit-transition-duration: ${options.transitionTime}ms;
         -moz-transition-duration: ${options.transitionTime}ms;
         -o-transition-duration: ${options.transitionTime}ms;
@@ -122,13 +125,16 @@
         cursor: pointer;
         padding: ${options.fontSize / 5}px;
         color: ${options.textColor};
-        opacity: ${options.opacity / 100};
+        opacity: ${options.onhoverOpacity / 100 * 0.7};
       }
       .${textResizer.className} div:hover {
         opacity: ${options.onhoverOpacity / 100};
       }
       .${textResizer.className} div.selected {
         font-weight: 800;
+        opacity: ${options.onhoverOpacity / 100 * 0.9};
+      }
+      .${textResizer.className} div.selected:hover {
         opacity: ${options.onhoverOpacity / 100 * 1.1};
       }
     `);
