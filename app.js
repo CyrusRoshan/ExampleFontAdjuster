@@ -193,11 +193,14 @@
   // we have to repeat this function each time an element is added to the DOM tree.
   function updateTextElements(){
     textContainingElements = [];
-    document.querySelectorAll('body *').forEach((element) => {
-      if (element.innerText && textResizer.className != element.parentNode.className) {
-        textContainingElements.push(element);
+    var elements = document.querySelectorAll('body *')
+
+    //forEach was messing up here
+    for (element in elements) {
+      if (elements[element].innerText && textResizer.className != elements[element].parentNode.className) {
+        textContainingElements.push(elements[element]);
       }
-    });
+    }
   }
 
   // For resizing text. Assuming this is completely modular, it's going to be a bit
