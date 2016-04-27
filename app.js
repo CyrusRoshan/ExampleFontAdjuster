@@ -158,7 +158,8 @@
         `);
       }
       // Add onClick font modification here
-      createdA.onclick = () => {resizeText(localStorage.viewSize, name)};
+      // default to medium if it hasn't been used before
+      createdA.onclick = () => {resizeText(localStorage.viewSize || 'medium', name)};
       return createdA;
     }
 
@@ -195,7 +196,7 @@
     textContainingElements = [];
     var elements = document.querySelectorAll('body *')
 
-    //forEach was messing up here
+    //add all elements with inner text that aren't part of the actual text size changer to the textContainingElements array
     for (element in elements) {
       if (elements[element].innerText && textResizer.className != elements[element].parentNode.className) {
         textContainingElements.push(elements[element]);
