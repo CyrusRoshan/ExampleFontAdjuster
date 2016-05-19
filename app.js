@@ -160,7 +160,10 @@
         `);
       }
       // Add onClick font modification here
+<<<<<<< HEAD
       // default to medium if it hasn't been used before
+=======
+>>>>>>> parent of 7411e2d... bugfix: default to medium font size if no previous uses
       createdA.onclick = () => {resizeText(localStorage.viewSize, name)};
       return createdA;
     }
@@ -197,7 +200,7 @@
     textContainingElements = [];
     var elements = document.querySelectorAll('body *');
 
-    //add all elements with inner text that aren't part of the actual text size changer to the textContainingElements array
+    //forEach was messing up here
     for (element in elements) {
       if (elements[element].innerText){//} && textResizer.className != elements[element].parentNode.className) {
         textContainingElements.push(elements[element]);
