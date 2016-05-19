@@ -37,6 +37,8 @@
   var textContainingElements = [];
   var textResizer = null;
   var updateElement = function(){
+    localStorage.removeItem('viewSize');
+
     // To disable font boosting in order to get proper computed element sizes
     // thanks to http://stackoverflow.com/a/15261825
     var node = document.createElement('style');
@@ -159,7 +161,7 @@
       }
       // Add onClick font modification here
       // default to medium if it hasn't been used before
-      createdA.onclick = () => {resizeText(localStorage.viewSize || 'medium', name)};
+      createdA.onclick = () => {resizeText(localStorage.viewSize, name)};
       return createdA;
     }
 
@@ -168,25 +170,24 @@
     textResizer.appendChild(createA('medium'));
     textResizer.appendChild(createA('large'));
 
-    updateTextElements();
-    var viewSize = localStorage.viewSize;
-    resizeText('medium', 'medium');
-    // Weird bug where
-    if (localStorage.viewSize) {
-      resizeText('medium', viewSize);
-    }
+
+    resizeText(localStorage.viewSize || 'medium', 'medium'); // initially resize text to medium (original size) or the previous selection by user
 
     // Create a MutationObserver instance to monitor new text containing nodes if they are
     // added on DOM modification
     var observer = new MutationObserver((mutations) => {
+      var addedNodes = [];
       for (var i = 0; i < mutations.length; i++){
         if (mutations[i].type === 'childList'){
-          updateTextElements();
-          break;
+          var nodeArray = Array.prototype.slice.call(mutations[i].addedNodes); // convert the added nodes to an array from nodelist
+          addedNodes = addedNodes.concat(nodeArray)
         }
-      };
+      }
+      for (var i = 0; i < addedNodes.length; i++) {
+        addTextElements(addedNodes[i])
+      }
     });
-    observer.observe(document.querySelector('body'), {subtree: true, childList: true});
+    observer.observe(document.documentElement, {subtree: true, childList: true});
   };
 
   // Get all text containing elements, so we don't have to waste time on non-text containing
@@ -194,12 +195,31 @@
   // we have to repeat this function each time an element is added to the DOM tree.
   function updateTextElements(){
     textContainingElements = [];
-    var elements = document.querySelectorAll('body *')
+    var elements = document.querySelectorAll('body *');
 
     //add all elements with inner text that aren't part of the actual text size changer to the textContainingElements array
     for (element in elements) {
-      if (elements[element].innerText && textResizer.className != elements[element].parentNode.className) {
+      if (elements[element].innerText){//} && textResizer.className != elements[element].parentNode.className) {
         textContainingElements.push(elements[element]);
+      }
+    }
+  }
+
+  // add text elements to the textContainingElements array, so that on an infinitely scrolling webpage, for example, they will still work
+  function addTextElements(node) {
+    if (node.className === 'truncated-text') {
+      console.log('VFOUND!!!')
+      console.log('  FOUND!!!')
+      console.log('^FOUND!!!')
+    }
+    if (node.innerText) {
+      var sizeMultiplier = sizeToRatio[localStorage.viewSize || 'medium'].actualSize;
+      var size = window.getComputedStyle(node, null).getPropertyValue('font-size');
+      node.style.fontSize = parseFloat(size) * sizeMultiplier + 'px';
+      textContainingElements.push(node);
+    } else if (node.children) {
+      for (var i=0; i < node.children.length; i++) {
+        addTextElements(node.children[i]);
       }
     }
   }
@@ -207,25 +227,18 @@
   // For resizing text. Assuming this is completely modular, it's going to be a bit
   // inefficient because we'll be changing the font size for every element
   function resizeText(oldSize, newSize){
-    // Modify the A that got selected
-    var i = 0;
-    for (var key in sizeToRatio) {
-      i++;
-      if (key === newSize){
-        textResizer.querySelector(`div:nth-child(${i})`).className = 'selected';
-      } else if (key === oldSize) {
-        textResizer.querySelector(`div:nth-child(${i})`).className = '';
-      }
-    }
+    // Modify the A that got selected and reset the one that was previously selected
+    textResizer.querySelector(`div:nth-child(${Object.keys(sizeToRatio).indexOf(oldSize) + 1})`).className = '';
+    textResizer.querySelector(`div:nth-child(${Object.keys(sizeToRatio).indexOf(newSize) + 1})`).className = 'selected';
 
     // Find current scroll position
     var scrollRatio = window.scrollY / document.documentElement.scrollHeight;
 
     // Modify the font size of all text-containing elements
-    var newNumericSize = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
+    var sizeMultiplier = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
     textContainingElements.forEach((element) => {
       var size = window.getComputedStyle(element, null).getPropertyValue('font-size');
-      element.style.fontSize = parseFloat(size) * newNumericSize + 'px';
+      element.style.fontSize = parseFloat(size) * sizeMultiplier + 'px';
     });
 
     // Return user to approximate previous scroll position
@@ -236,6 +249,7 @@
   }
 
   var update = function(){
+    updateTextElements(); // create initial log of text containing elements
     updateElement();
   }
 
