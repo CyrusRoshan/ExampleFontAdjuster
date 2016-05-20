@@ -64,8 +64,6 @@
   var textResizer = null;
   var checkedTimes = 0;
   var updateElement = function(){
-    localStorage.removeItem('viewSize');
-
     // To disable font boosting in order to get proper computed element sizes
     // thanks to http://stackoverflow.com/a/15261825
     var node = document.createElement('style');
@@ -79,15 +77,9 @@
     // We need to force options.element to body if options.position is 'fixed', because
     // not showing a selection via showIf doesn't make it change to its default value
     // Probably a bug, since it seems unintuitive
-    if (options.position === 'fixed') {
-      options.element = {
-        "selector": "body",
-        "method": "append"
-      }
-    }
 
     // The text resizer itself
-    textResizer = Eager.createElement(options.element, textResizer);
+    textResizer = Eager.createElement({'selector': 'body','method': 'append'}, textResizer);
     textResizer.className = 'example-font-size-resizer';
 
     // Converting corner position, and vertical/horizontal margins to CSS
@@ -138,16 +130,14 @@
     }
 
     // Actually create the different sized A's
-    console.log('pls')
     Object.keys(sizeToRatio).forEach(size => {
-      console.log('what')
       textResizer.appendChild(createA(size));
     })
 
     var resizingCSS = document.createElement('style');
     document.head.appendChild(resizingCSS);
 
-    resizeText(localStorage.viewSize || 'medium', 'medium'); // initially resize text to medium (original size) or the previous selection by user
+    resizeText('medium', localStorage.viewSize || 'medium'); // initially resize text to medium (original size) or the previous selection by user
 
     function resizeText(oldSize, newSize) {
       var newCss = '';
@@ -177,7 +167,7 @@
           border-radius: ${options.borderRadius}px !important;
           background-color: ${options.backgroundColor} !important;
           opacity: ${options.opacity / 100} !important;
-          position: ${options.position} !important;
+          position: fixed !important;
           -webkit-transition-duration: ${options.transitionTime}ms !important;
           -moz-transition-duration: ${options.transitionTime}ms !important;
           -o-transition-duration: ${options.transitionTime}ms !important;
@@ -218,7 +208,6 @@
           font-size: ${options.fontSize * sizeToRatio[size].shownSize}px !important;
         }\n`
       })
-      console.log(newCss);
 
       // Find current scroll position
       var scrollRatio = window.scrollY / document.documentElement.scrollHeight;

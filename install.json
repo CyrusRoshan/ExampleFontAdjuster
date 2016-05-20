@@ -17,34 +17,6 @@
   },
   "options": {
     "properties": {
-      "position": {
-        "title": "Position",
-        "description": "",
-        "type": "string",
-        "format": "radios",
-        "enum": [
-          "fixed",
-          "relative"
-        ],
-        "enumNames": {
-          "fixed": "Fixed",
-          "relative": "Relative"
-        },
-        "default": "fixed"
-      },
-      "element": {
-        "title": "Location",
-        "description": "Where the font resizer will appear",
-        "type": "object",
-        "format": "element",
-        "default": {
-          "selector": "body",
-          "method": "append"
-        },
-        "showIf": {
-          "position": "relative"
-        }
-      },
       "corner": {
         "title": "Corner",
         "description": "Corner (of the previously selected location) that the font resizer should appear in",
