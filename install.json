@@ -58,45 +58,58 @@
       },
       "fontSize": {
         "title": "Font Size",
-        "description": "Font size (in px) of the medium sized \"A\"",
-        "type": "number",
-        "default": 20
+        "type": "string",
+        "enum": [
+          "15",
+          "20",
+          "25"
+        ],
+        "enumNames": {
+          "15": "Small",
+          "20": "Medium",
+          "25": "Large"
+        },
+        "format": "radios",
+        "default": "20"
       },
-      "spacing": {
-        "title": "Spacing",
-        "description": "Spacing (in px) between \"A\"s",
-        "type": "number",
-        "default": 5
-      },
-      "opacity": {
-        "title": "Opacity",
-        "description": "Opacity (out of 100) of the background and of unselected \"A\"s on the font resizer",
-        "type": "number",
-        "default": 60
-      },
-      "onhoverOpacity": {
-        "title": "Opacity On Hover",
-        "description": "Opacity (out of 100) of the background and of unselected \"A\"s on the font resizer when the mouse is hovered over",
-        "type": "number",
-        "default": 90
-      },
-      "transitionTime": {
-        "title": "Transition Time",
-        "description": "Time (in milliseconds) for the text resizer to transition between its different states (e.g. no hover to hover for a change in opacity)",
-        "type": "number",
-        "default": 500
+      "seeThrough": {
+        "title": "See-through",
+        "type": "boolean",
+        "default": true
       },
       "verticalMargin": {
-        "title": "Vertical Margin",
-        "description": "Vertical margin of the font resizer (in px)",
-        "type": "number",
-        "default": 10
+        "title": "Vertical Spacing",
+        "description": "Vertical spacing of the font resizer",
+        "type": "string",
+        "enum": [
+          "10",
+          "25",
+          "50"
+        ],
+        "enumNames": {
+          "10": "Small",
+          "25": "Medium",
+          "50": "Large"
+        },
+        "format": "radios",
+        "default": "10"
       },
       "horizontalMargin": {
-        "title": "Horizontal Margin",
-        "description": "Horizontal margin of the font resizer (in px)",
-        "type": "number",
-        "default": 10
+        "title": "Horizontal Spacing",
+        "description": "Horizontal spacing of the font resizer",
+        "type": "string",
+        "enum": [
+          "10",
+          "25",
+          "50"
+        ],
+        "enumNames": {
+          "10": "Small",
+          "25": "Medium",
+          "50": "Large"
+        },
+        "format": "radios",
+        "default": "10"
       }
     }
   }

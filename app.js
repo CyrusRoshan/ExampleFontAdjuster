@@ -63,7 +63,13 @@
   var textContainingElements = [];
   var textResizer = null;
   var checkedTimes = 0;
+  var resizingCSS = document.createElement('style');
+  document.head.appendChild(resizingCSS);
   var updateElement = function(){
+    // fix in order to fix compounding size multipliers while non-medium A selected and
+    // user previewing the install is changing options
+    resizingCSS.innerHTML = '';
+
     // To disable font boosting in order to get proper computed element sizes
     // thanks to http://stackoverflow.com/a/15261825
     var node = document.createElement('style');
@@ -82,7 +88,7 @@
     textResizer = Eager.createElement({'selector': 'body','method': 'append'}, textResizer);
     textResizer.className = 'example-font-size-resizer';
 
-    // Converting corner position, and vertical/horizontal margins to CSS
+    // Converting corner position, and vertical/horizontal s to CSS
     var verticalDirection, horizontalDirection;
     switch (options.corner) {
       case 'topLeft':
@@ -104,24 +110,10 @@
         break;
     };
 
-    textResizer.style.cssText += (`
-      ${verticalDirection}: ${options.verticalMargin}px;
-      ${horizontalDirection}: ${options.horizontalMargin}px;
-    `);
-
     // Literally creates the A's in the font size selector
     function createA(name) {
       createdA = document.createElement('div');
       createdA.innerText = 'A';
-
-      // For spacing
-      if (name === 'medium') {
-        createdA.style.cssText += (`
-          margin: ${options.spacing}px;
-          margin-top: 0;
-          margin-bottom: 0;
-        `);
-      }
 
       // Add onClick font modification here
       // default to medium if it hasn't been used before
@@ -133,9 +125,6 @@
     Object.keys(sizeToRatio).forEach(size => {
       textResizer.appendChild(createA(size));
     })
-
-    var resizingCSS = document.createElement('style');
-    document.head.appendChild(resizingCSS);
 
     resizeText('medium', localStorage.viewSize || 'medium'); // initially resize text to medium (original size) or the previous selection by user
 
@@ -157,6 +146,8 @@
       // might as well take this opportunity to add the css for the A's since we're going to be refreshing this on click anyway
       newCss += (`
         .${textResizer.className} {
+          ${verticalDirection}: ${options.verticalMargin}px !important;
+          ${horizontalDirection}: ${options.horizontalMargin}px !important;
           display: inline-block !important;
           padding: 5px !important;
           z-index: 2147483647 !important;
@@ -166,16 +157,16 @@
           -o-user-select: none !important;
           border-radius: ${options.borderRadius}px !important;
           background-color: ${options.backgroundColor} !important;
-          opacity: ${options.opacity / 100} !important;
+          opacity: ${options.seeThrough ? 0.5 : 1} !important;
           position: fixed !important;
-          -webkit-transition-duration: ${options.transitionTime}ms !important;
-          -moz-transition-duration: ${options.transitionTime}ms !important;
-          -o-transition-duration: ${options.transitionTime}ms !important;
-          transition-duration: ${options.transitionTime}ms !important;
+          -webkit-transition-duration: 500ms !important;
+          -moz-transition-duration: 500ms !important;
+          -o-transition-duration: 500ms !important;
+          transition-duration: 500ms !important;
         }
 
         .${textResizer.className}:hover {
-          opacity: ${options.onhoverOpacity / 100} !important;
+          opacity: ${options.seeThrough ? 0.8 : 1} !important;
         }
 
         .${textResizer.className} div {
@@ -188,17 +179,21 @@
           cursor: pointer !important;
           padding: ${options.fontSize / 5}px !important;
           color: ${options.textColor} !important;
-          opacity: ${options.onhoverOpacity / 100 * 0.6} !important;
+          opacity: 0.5 !important;
+          -webkit-transition-duration: 500ms !important;
+          -moz-transition-duration: 500ms !important;
+          -o-transition-duration: 500ms !important;
+          transition-duration: 500ms !important;
         }
         .${textResizer.className} div:hover {
-          opacity: ${options.onhoverOpacity / 100} !important;
+          opacity: 0.9 !important;
         }
         .${textResizer.className} div:nth-child(${Object.keys(sizeToRatio).indexOf(newSize) + 1}) {
           font-weight: 800 !important;
-          opacity: ${options.onhoverOpacity / 100 * 0.85} !important;
+          opacity: 0.9 !important;
         }
         .${textResizer.className} div:nth-child(${Object.keys(sizeToRatio).indexOf(newSize) + 1}):hover {
-          opacity: ${options.onhoverOpacity / 100 * 1.1} !important;
+          opacity: 1 !important;
         }
       `);
 
