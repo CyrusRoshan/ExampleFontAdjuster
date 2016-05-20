@@ -51,10 +51,21 @@
         "default": "#000000"
       },
       "borderRadius": {
-        "title": "Border Radius",
-        "description": "Border radius (in px) of the font resizer",
-        "type": "number",
-        "default": 5
+        "title": "Rounded Edges",
+        "description": "Changes the rounding of the edges on the font resizer rectangle",
+        "type": "string",
+        "enum": [
+          "0",
+          "5",
+          "10"
+        ],
+        "enumNames": {
+          "0": "None",
+          "5": "Small",
+          "10": "Medium"
+        },
+        "format": "radios",
+        "default": "small"
       },
       "fontSize": {
         "title": "Font Size",
