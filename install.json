@@ -19,7 +19,6 @@
     "properties": {
       "corner": {
         "title": "Corner",
-        "description": "Corner (of the previously selected location) that the font resizer should appear in",
         "type": "string",
         "format": "radios",
         "enum": [
@@ -38,21 +37,18 @@
       },
       "textColor": {
         "title": "Text Color",
-        "description": "Text color for the \"A\"s on the font resizer",
         "type": "string",
         "format": "color",
         "default": "#ffffff"
       },
       "backgroundColor": {
         "title": "Background Color",
-        "description": "Background color for the font resizer",
         "type": "string",
         "format": "color",
         "default": "#000000"
       },
       "borderRadius": {
         "title": "Rounded Edges",
-        "description": "Changes the rounding of the edges on the font resizer rectangle",
         "type": "string",
         "enum": [
           "0",
@@ -65,10 +61,10 @@
           "10": "Medium"
         },
         "format": "radios",
-        "default": "small"
+        "default": "5"
       },
       "fontSize": {
-        "title": "Font Size",
+        "title": "Size",
         "type": "string",
         "enum": [
           "15",
@@ -87,40 +83,6 @@
         "title": "See-through",
         "type": "boolean",
         "default": true
-      },
-      "verticalMargin": {
-        "title": "Vertical Spacing",
-        "description": "Vertical spacing of the font resizer",
-        "type": "string",
-        "enum": [
-          "10",
-          "25",
-          "50"
-        ],
-        "enumNames": {
-          "10": "Small",
-          "25": "Medium",
-          "50": "Large"
-        },
-        "format": "radios",
-        "default": "10"
-      },
-      "horizontalMargin": {
-        "title": "Horizontal Spacing",
-        "description": "Horizontal spacing of the font resizer",
-        "type": "string",
-        "enum": [
-          "10",
-          "25",
-          "50"
-        ],
-        "enumNames": {
-          "10": "Small",
-          "25": "Medium",
-          "50": "Large"
-        },
-        "format": "radios",
-        "default": "10"
       }
     }
   }

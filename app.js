@@ -55,6 +55,7 @@
     'menuitem',
     'element',
     'span',
+    'code',
   ];
 
   // We get our stored view size from the last time a visitor viewed the site.
@@ -146,8 +147,8 @@
       // might as well take this opportunity to add the css for the A's since we're going to be refreshing this on click anyway
       newCss += (`
         .${textResizer.className} {
-          ${verticalDirection}: ${options.verticalMargin}px !important;
-          ${horizontalDirection}: ${options.horizontalMargin}px !important;
+          ${verticalDirection}: 10px !important;
+          ${horizontalDirection}: 10px !important;
           display: inline-block !important;
           padding: 5px !important;
           z-index: 2147483647 !important;
@@ -186,10 +187,9 @@
           transition-duration: 500ms !important;
         }
         .${textResizer.className} div:hover {
-          opacity: 0.9 !important;
+          opacity: 0.8!important;
         }
         .${textResizer.className} div:nth-child(${Object.keys(sizeToRatio).indexOf(newSize) + 1}) {
-          font-weight: 800 !important;
           opacity: 0.9 !important;
         }
         .${textResizer.className} div:nth-child(${Object.keys(sizeToRatio).indexOf(newSize) + 1}):hover {
