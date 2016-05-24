@@ -130,17 +130,14 @@
       textResizer.appendChild(createA(size));
     })
 
-    if (localStorage.EagerTextViewSize === 'medium' || localStorage.EagerTextViewSize == undefined) {
-     resizeText('firstTime', 'medium')
-    } else {
-     resizeText(localStorage.EagerTextViewSize, 'medium'); // initially resize text to medium (original size) or the previous selection by user
-    }
+    resizeText('medium', localStorage.EagerTextViewSize || 'medium'); // initially resize text to medium (original size) or the previous selection by user
 
     function resizeText(oldSize, newSize) {
       var newCss = '';
 
       // add css for all element tags that probably contain text
-      if (oldSize != 'firstTime') {
+      if (newSize != 'medium') {
+        console.log(oldSize, newSize)
         var sizeMultiplier = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
         htmlTags.forEach(tag => {
           var firstElement = document.querySelector(tag);
