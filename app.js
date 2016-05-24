@@ -16,17 +16,17 @@
   // wastes time that they should have been using on the website's actual content.
   // However, it's not that hard to modify to allow website owners to add additional sizes
   const sizeToRatio = {
-    'small': {
-      shownSize: 0.7,
-      actualSize: 0.7
-    },
     'medium': {
-      shownSize: 1,
+      shownSize: 0.7,
       actualSize: 1
     },
     'large': {
-      shownSize: 1.5,
+      shownSize: 1,
       actualSize: 1.5
+    },
+    'extraLarge': {
+      shownSize: 1.5,
+      actualSize: 2
     }
   }
 
@@ -65,6 +65,9 @@
   var textResizer = null;
   var checkedTimes = 0;
   var resizingCSS = document.createElement('style');
+  if (INSTALL_ID == 'preview') {
+    localStorage.removeItem('EagerTextViewSize')
+  }
   document.head.appendChild(resizingCSS);
   var updateElement = function(){
     // fix in order to fix compounding size multipliers while non-medium A selected and
@@ -118,7 +121,7 @@
 
       // Add onClick font modification here
       // default to medium if it hasn't been used before
-      createdA.onclick = () => {resizeText(localStorage.viewSize, name)};
+      createdA.onclick = () => {resizeText(localStorage.EagerTextViewSize, name)};
       return createdA;
     }
 
@@ -127,24 +130,31 @@
       textResizer.appendChild(createA(size));
     })
 
-    resizeText('medium', localStorage.viewSize || 'medium'); // initially resize text to medium (original size) or the previous selection by user
+    if (localStorage.EagerTextViewSize === 'medium' || localStorage.EagerTextViewSize == undefined) {
+     resizeText('firstTime', 'medium')
+    } else {
+     resizeText(localStorage.EagerTextViewSize, 'medium'); // initially resize text to medium (original size) or the previous selection by user
+    }
 
     function resizeText(oldSize, newSize) {
       var newCss = '';
-      var sizeMultiplier = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
 
-      htmlTags.forEach(tag => {
-        var firstElement = document.querySelector(tag);
-        if (firstElement) {
-          var newFontSize = parseFloat(window.getComputedStyle(document.querySelector(tag), null).fontSize) * sizeMultiplier;
-          newCss += `${tag} {
-            font-size: ${newFontSize}px !important;
-            line-height: 1.1 !important;
-          }\n`
-        }
-      })
+      // add css for all element tags that probably contain text
+      if (oldSize != 'firstTime') {
+        var sizeMultiplier = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
+        htmlTags.forEach(tag => {
+          var firstElement = document.querySelector(tag);
+          if (firstElement) {
+            var newFontSize = parseFloat(window.getComputedStyle(document.querySelector(tag), null).fontSize) * sizeMultiplier;
+            newCss += `${tag} {
+              font-size: ${newFontSize}px !important;
+              line-height: 1.6 !important;
+            }\n`
+          }
+        })
+      }
 
-      // might as well take this opportunity to add the css for the A's since we're going to be refreshing this on click anyway
+      // add css for text resizer itself
       newCss += (`
         .${textResizer.className} {
           ${verticalDirection}: 10px !important;
@@ -197,6 +207,7 @@
         }
       `);
 
+      // make css for A sizes
       Object.keys(sizeToRatio).forEach(size => {
         newCss += `.${textResizer.className} div:nth-child(${Object.keys(sizeToRatio).indexOf(size) + 1}) {
           line-height: ${options.fontSize * sizeToRatio[Object.keys(sizeToRatio).slice(-1)[0]].shownSize}px !important;
@@ -208,7 +219,7 @@
       var scrollRatio = window.scrollY / document.documentElement.scrollHeight;
 
       resizingCSS.innerHTML = newCss;
-      localStorage.viewSize = newSize;
+      localStorage.EagerTextViewSize = newSize;
 
       // Return user to approximate previous scroll position
       window.scroll(window.scrollX, scrollRatio * document.documentElement.scrollHeight);
