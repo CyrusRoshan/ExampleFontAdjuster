@@ -38,6 +38,7 @@
     'h5',
     'h6',
     'p',
+    'a',
     'div',
     'nav',
     'section',
@@ -137,7 +138,6 @@
 
       // add css for all element tags that probably contain text
       if (newSize != 'medium') {
-        console.log(oldSize, newSize)
         var sizeMultiplier = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
         htmlTags.forEach(tag => {
           var firstElement = document.querySelector(tag);
