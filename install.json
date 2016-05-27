@@ -3,7 +3,7 @@
     "head": [
       {
         "type": "script",
-        "src": "./app.js"
+        "src": "./dist/app.js"
       }
     ]
   },
