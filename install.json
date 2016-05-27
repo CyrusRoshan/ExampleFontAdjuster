@@ -18,6 +18,7 @@
   "options": {
     "properties": {
       "corner": {
+        "order": 1,
         "title": "Corner",
         "type": "string",
         "format": "radios",
@@ -35,19 +36,28 @@
         },
         "default": "bottomRight"
       },
+      "seeThrough": {
+        "order": 2,
+        "title": "See-through",
+        "type": "boolean",
+        "default": true
+      },
       "textColor": {
+        "order": 3,
         "title": "Text Color",
         "type": "string",
         "format": "color",
         "default": "#ffffff"
       },
       "backgroundColor": {
+        "order": 4,
         "title": "Background Color",
         "type": "string",
         "format": "color",
         "default": "#000000"
       },
       "borderRadius": {
+        "order": 5,
         "title": "Rounded Edges",
         "type": "string",
         "enum": [
@@ -64,6 +74,7 @@
         "default": "5"
       },
       "fontSize": {
+        "order": 6,
         "title": "Size",
         "type": "string",
         "enum": [
@@ -78,11 +89,6 @@
         },
         "format": "radios",
         "default": "20"
-      },
-      "seeThrough": {
-        "title": "See-through",
-        "type": "boolean",
-        "default": true
       }
     }
   }
