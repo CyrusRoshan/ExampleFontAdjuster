@@ -20,32 +20,7 @@
   }
 
   const htmlTags = [
-    'h1',
-    'h2',
-    'h3',
-    'h4',
-    'h5',
-    'h6',
     'p',
-    'a',
-    'div',
-    'nav',
-    'section',
-    'li',
-    'ul',
-    'ol',
-    'td',
-    'th',
-    'button',
-    'form',
-    'input',
-    'label',
-    'textarea',
-    'menu',
-    'menuitem',
-    'element',
-    'span',
-    'code',
   ];
 
   let viewSize = localStorage.EagerTextViewSize
@@ -53,12 +28,25 @@
     viewSize = 'original'
   }
 
-  let resizingCSS = document.createElement('style');
-  document.head.appendChild(resizingCSS);
 
+  let resizingCSS = null;
   let textResizer = null;
 
   function onLoad() {
+    let tagCount = 0;
+    htmlTags.forEach(tag => {
+      tagCount += document.querySelectorAll(tag).length;
+    })
+
+    console.log(tagCount)
+    if (tagCount < 2 && document.body.innerText.length > 1000) {
+      return;
+    }
+
+    resizingCSS = document.createElement('style');
+    document.head.appendChild(resizingCSS);
+    resizingCSS.className = 'eager-apps-text-enlarger-css'
+
     textResizer = document.createElement('div');
     document.body.appendChild(textResizer)
     textResizer.className = 'eager-apps-text-enlarger-app';
@@ -78,21 +66,6 @@
   }
 
   function resizeText(oldSize, newSize) {
-    let tagCSS = ''
-    if (newSize != 'original') {
-      let sizeMultiplier = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
-      htmlTags.forEach(tag => {
-        let firstElement = document.querySelector(tag);
-        if (firstElement) {
-          let newFontSize = parseFloat(window.getComputedStyle(document.querySelector(tag), null).fontSize) * sizeMultiplier;
-          tagCSS += `${tag} {
-            font-size: ${newFontSize}px !important;
-            line-height: 1.6 !important;
-          }\n`
-        }
-      })
-    }
-
     let verticalDirection, horizontalDirection;
     switch (options.corner) {
       case 'topLeft':
@@ -174,10 +147,21 @@
       }\n`
     })
 
+    resizingCSS.innerHTML = textResizerCSS + aCSS;
+
     // Save scroll ratio to be able to return user to the same position on the page after we've finished resizing the text
     let scrollRatio = window.scrollY / document.documentElement.scrollHeight;
 
-    resizingCSS.innerHTML = tagCSS + textResizerCSS + aCSS;
+    if (!(newSize == 'original' && oldSize == 'original')) {
+      let sizeMultiplier = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
+      htmlTags.forEach(tag => {
+        let tagElements = document.querySelectorAll(tag);
+        for (let i = 0; i < tagElements.length; i++) {
+          tagElements[i].style.fontSize = parseFloat(window.getComputedStyle(tagElements[i]).fontSize) * sizeMultiplier + "px";
+        }
+      })
+    }
+
     viewSize = newSize; // For browsers that can't set localStorage variables
     try {
       localStorage.EagerTextViewSize = newSize;

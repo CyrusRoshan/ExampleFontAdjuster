@@ -20,19 +20,31 @@
     }
   };
 
-  var htmlTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'div', 'nav', 'section', 'li', 'ul', 'ol', 'td', 'th', 'button', 'form', 'input', 'label', 'textarea', 'menu', 'menuitem', 'element', 'span', 'code'];
+  var htmlTags = ['p', 'i'];
 
   var viewSize = localStorage.EagerTextViewSize;
   if (INSTALL_ID == 'preview') {
     viewSize = 'original';
   }
 
-  var resizingCSS = document.createElement('style');
-  document.head.appendChild(resizingCSS);
-
+  var resizingCSS = null;
   var textResizer = null;
 
   function onLoad() {
+    var tagCount = 0;
+    htmlTags.forEach(function (tag) {
+      tagCount += document.querySelectorAll(tag).length;
+    });
+
+    console.log(tagCount);
+    if (tagCount < 2 && document.body.innerText.length > 1000) {
+      return;
+    }
+
+    resizingCSS = document.createElement('style');
+    document.head.appendChild(resizingCSS);
+    resizingCSS.className = 'eager-apps-text-enlarger-css';
+
     textResizer = document.createElement('div');
     document.body.appendChild(textResizer);
     textResizer.className = 'eager-apps-text-enlarger-app';
@@ -54,21 +66,6 @@
   }
 
   function resizeText(oldSize, newSize) {
-
-    var tagCSS = '';
-    if (newSize != 'original') {
-      (function () {
-        var sizeMultiplier = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
-        htmlTags.forEach(function (tag) {
-          var firstElement = document.querySelector(tag);
-          if (firstElement) {
-            var newFontSize = parseFloat(window.getComputedStyle(document.querySelector(tag), null).fontSize) * sizeMultiplier;
-            tagCSS += tag + ' {\n            font-size: ' + newFontSize + 'px !important;\n            line-height: 1.6 !important;\n          }\n';
-          }
-        });
-      })();
-    }
-
     var verticalDirection = void 0,
         horizontalDirection = void 0;
     switch (options.corner) {
@@ -98,10 +95,23 @@
       aCSS += '.' + textResizer.className + ' div:nth-child(' + (Object.keys(sizeToRatio).indexOf(size) + 1) + ') {\n        line-height: ' + options.fontSize * sizeToRatio[Object.keys(sizeToRatio).slice(-1)[0]].shownSize + 'px !important;\n        font-size: ' + options.fontSize * sizeToRatio[size].shownSize + 'px !important;\n      }\n';
     });
 
+    resizingCSS.innerHTML = textResizerCSS + aCSS;
+
     // Save scroll ratio to be able to return user to the same position on the page after we've finished resizing the text
     var scrollRatio = window.scrollY / document.documentElement.scrollHeight;
 
-    resizingCSS.innerHTML = tagCSS + textResizerCSS + aCSS;
+    if (!(newSize == 'original' && oldSize == 'original')) {
+      (function () {
+        var sizeMultiplier = sizeToRatio[newSize].actualSize / sizeToRatio[oldSize].actualSize;
+        htmlTags.forEach(function (tag) {
+          var tagElements = document.querySelectorAll(tag);
+          for (var i = 0; i < tagElements.length; i++) {
+            tagElements[i].style.fontSize = parseFloat(window.getComputedStyle(tagElements[i]).fontSize) * sizeMultiplier + "px";
+          }
+        });
+      })();
+    }
+
     viewSize = newSize; // For browsers that can't set localStorage variables
     try {
       localStorage.EagerTextViewSize = newSize;
@@ -116,7 +126,6 @@
   //*********************
 
   var update = function update() {
-    //updateElement();
     resizeText('original', viewSize || 'original');
   };
 
